@@ -2,6 +2,8 @@ package ca.bestbuy.zephyrtestautomation.service;
 
 import ca.bestbuy.zephyrtestautomation.request.GPTRequest;
 import ca.bestbuy.zephyrtestautomation.response.GPTResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -12,6 +14,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class GPTService {
@@ -23,17 +27,28 @@ public class GPTService {
     private String OPEN_API_URL;
 
     public String generateGPTTestStep(String gwt){
-        GPTRequest gptRequest = new GPTRequest();
-        gptRequest.setPrompt(gwt);
+        List<GPTRequest.ChatMessage> messages = new ArrayList<>();
+        messages.add(new GPTRequest.ChatMessage("system", "You are a helpful assistant."));
+        messages.add(new GPTRequest.ChatMessage("user", gwt));
 
+        // Create request
+        GPTRequest gptRequest = new GPTRequest();
+        gptRequest.setModel("gpt-3.5-turbo");
+        gptRequest.setMessages(messages);
+        gptRequest.setTemperature(1.0); // Set temperature
+        System.out.println("eky" + OPEN_API_KEY);
 
         // make a post request to openai gpt
         HttpPost httpPost = new HttpPost(OPEN_API_URL);
-        httpPost.setHeader("Authorization ", "Bearer " + OPEN_API_KEY);
+        httpPost.setHeader("Authorization", "Bearer " + OPEN_API_KEY);
         httpPost.setHeader("Content-Type", "application/json");
-        httpPost.setHeader("Accept", "application/json");
 
-        String body = "";
+        Gson gson = new Gson();
+        String body = gson.toJson(gptRequest);
+
+        System.out.println("Request body: " + body);
+
+        ObjectMapper objectMapper = new ObjectMapper();
 
         try {
             final StringEntity entity = new StringEntity(body);
@@ -41,12 +56,12 @@ public class GPTService {
 
             try (CloseableHttpClient httpClient = HttpClients.custom().build();
                  CloseableHttpResponse response = httpClient.execute(httpPost)) {
-                String responseBoyd = EntityUtils.toString(response.getEntity());
-                GPTResponse gptResponse;
-                return "Error";
-//                return gptResponse.getChoices().get(0).getText();
-            } catch (IOException e) {
-                e.printStackTrace();
+                String responseBody = EntityUtils.toString(response.getEntity());
+                System.out.println("Response body: " + responseBody);
+                GPTResponse gptResponse = objectMapper.readValue(responseBody, GPTResponse.class);
+                return gptResponse.getChoices().get(0).getMessage().getContent();
+
+            } catch (Exception e) {
                 return "Error";
             }
         } catch (Exception e) {
