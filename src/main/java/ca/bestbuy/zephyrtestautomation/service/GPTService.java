@@ -36,7 +36,6 @@ public class GPTService {
         gptRequest.setModel("gpt-3.5-turbo");
         gptRequest.setMessages(messages);
         gptRequest.setTemperature(1.0); // Set temperature
-        System.out.println("eky" + OPEN_API_KEY);
 
         // make a post request to openai gpt
         HttpPost httpPost = new HttpPost(OPEN_API_URL);

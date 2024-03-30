@@ -1,6 +1,13 @@
 package ca.bestbuy.zephyrtestautomation.model;
 
-public record JiraContent(
-        String description
-) {
+
+import lombok.Data;
+@Data
+public class JiraContent {
+    private String jiraDescription;
+
+    public String getJiraDescription() {
+        return jiraDescription;
+    }
+
 }
