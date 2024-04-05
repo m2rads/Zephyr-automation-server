@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/gpt")
 public class ChatGPTController {
@@ -18,8 +20,8 @@ public class ChatGPTController {
     }
 
     @PostMapping("/test-step")
-    public String testStep(@RequestBody JiraContent jiraContent) {
-        System.out.println(jiraContent.toString() + " is the jira description");
-        return gptService.generateGPTTestStep(jiraContent.getJiraDescription());
+    public Map<String, Object> testStep(@RequestBody Map<String, String> requestBody) {
+        System.out.println(requestBody.get("jiraPrompt"));
+        return gptService.generateGPTTestStep(requestBody);
     }
 }
